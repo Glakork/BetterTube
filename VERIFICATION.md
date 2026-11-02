@@ -5,7 +5,8 @@
 - 16 JavaScript regression tests passed: URL validation; timestamp selection; overlapping intervals; Undo; route changes and stale replies; live/mismatched durations; paused/seeking guards; ad-vs-content separation; immediate setting changes.
 - 21 Swift core checks passed, including hashed requests, exact bucket matching, caching, HTTP failures, malformed payloads, and timestamp validation.
 - Xcode project, Info.plist, and privacy manifest pass property-list validation.
-- GitHub iOS build: pending.
+- Native macOS WebKit successfully compiled the ad-block rules.
+- GitHub iOS build: validation in progress.
 
 ## Required device checks
 

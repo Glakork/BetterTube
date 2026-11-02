@@ -39,7 +39,7 @@ final class BrowserModel: NSObject, ObservableObject, WKNavigationDelegate, WKUI
         webView = WKWebView(frame: .zero, configuration: config)
         super.init()
         messageProxy.owner = self
-        config.userContentController.addScriptMessageHandler(messageProxy, contentWorld: Self.world, name: "betterTube")
+        config.userContentController.add(messageProxy, contentWorld: Self.world, name: "betterTube")
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true

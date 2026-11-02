@@ -25,6 +25,10 @@ jobs:
           mkdir -p build
           swiftc -swift-version 5 BetterTube/Core/YouTubeURL.swift BetterTube/Core/SponsorService.swift Tests/CoreTests.swift -o build/core-tests
           build/core-tests
+      - name: Validate native WebKit ad filters
+        run: |
+          swiftc Tests/RuleCheck.swift -o build/rule-check
+          build/rule-check BetterTube/Web/AdBlockRules.json
       - name: Build iPhone app and package unsigned IPA
         run: bash scripts/build-ipa.sh
       - name: Upload sideload package
