@@ -1,0 +1,60 @@
+name: Build iOS IPA
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Segment and player regression tests
+        run: node --test Tests/*.test.cjs
+      - name: Swift core regression tests
+        run: |
+          mkdir -p build
+          swiftc -swift-version 5 BetterTube/Core/YouTubeURL.swift BetterTube/Core/SponsorService.swift Tests/CoreTests.swift -o build/core-tests
+          build/core-tests
+      - name: Build iPhone app and package unsigned IPA
+        run: bash scripts/build-ipa.sh
+      - name: Upload sideload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterTube-unsigned-ipa
+          path: |
+            build/BetterTube-unsigned.ipa
+            build/BetterTube-unsigned.ipa.sha256
+          if-no-files-found: error
+          retention-days: 30
+      - name: Build simulator app for verification
+        run: |
+          xcodebuild -project BetterTube.xcodeproj -scheme BetterTube -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO build
+      - name: Launch app in iPhone simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(v["udid"] for group in d["devices"].values() for v in group if "iPhone" in v["name"]))')
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" build/Simulator/Build/Products/Debug-iphonesimulator/BetterTube.app
+          xcrun simctl launch "$UDID" com.glakork.BetterTube
+          sleep 8
+          xcrun simctl spawn "$UDID" launchctl list > build/simulator-processes.txt
+          python3 -c 'from pathlib import Path; assert "com.glakork.BetterTube" in Path("build/simulator-processes.txt").read_text(), "App terminated after launch"'
+          xcrun simctl io "$UDID" screenshot build/BetterTube-onboarding.png
+      - name: Upload simulator evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterTube-simulator-verification
+          path: |
+            build/BetterTube-onboarding.png
+            build/simulator-processes.txt
+          if-no-files-found: error

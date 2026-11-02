@@ -59,4 +59,4 @@ swiftc -swift-version 5 BetterTube/Core/YouTubeURL.swift BetterTube/Core/Sponsor
 build/core-tests
 ```
 
-The workflow runs the JavaScript player regressions and Swift network/URL tests, builds the physical-device app, packages the IPA, and compiles the simulator app. These checks do not prove real-world YouTube ad suppression or iPhone playback. See `VERIFICATION.md` for the observed results and remaining device checks.
+The workflow runs the JavaScript player regressions and Swift network/URL tests, builds the physical-device app, packages the IPA, compiles the simulator app, and launches it for an onboarding screenshot. These checks do not prove real-world YouTube ad suppression or iPhone playback. See `VERIFICATION.md` for the observed results and remaining device checks.
